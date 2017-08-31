@@ -1,0 +1,27 @@
+{
+  "name": "@steemit/overseer-server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "make ci-test"
+  },
+  "engines": {
+    "node": "^8"
+  },
+  "dependencies": {
+    "koa": "^2.3.0",
+    "verror": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.39",
+    "@types/mocha": "^2.2.41",
+    "@types/node": "^8.0.26",
+    "@types/verror": "^1.10.1",
+    "mocha": "^3.5.0",
+    "nyc": "^11.1.0",
+    "onchange": "^3.2.1",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.0"
+  }
+}
