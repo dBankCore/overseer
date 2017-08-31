@@ -13,4 +13,12 @@ rpc.register('test', (hello: string) => {
     return {hello}
 })
 
-app.listen(9943)
+let port = 8090
+if (process.env.PORT) {
+    port = parseInt(process.env.PORT as string, 10)
+}
+
+app.listen(port, () => {
+    // tslint:disable-next-line
+    console.log(`listening on ${ port }`)
+})

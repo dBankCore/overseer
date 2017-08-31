@@ -69,7 +69,7 @@ export class JsonRpcError extends VError {
 
     public toJSON() {
         const code = this.code
-        const data = JsonRpcError.info(this)
+        const data = JsonRpcError.info(this) as any
         const message = this.message
         if (Object.keys(data).length > 0) {
             return {code, data, message}
