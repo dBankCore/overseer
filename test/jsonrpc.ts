@@ -35,6 +35,10 @@ describe('JsonRpc', function() {
     rpc.register('notify_sum',  async () => {})
     rpc.register('get_data',  async () => ["hello", 5])
 
+    rpc.register('ctx', async function(foo: string) {
+        return {ip: this.ctx.request.ip, foo}
+    })
+
     async function send(body: string) {
         return new Promise((resolve, reject) => {
             const request = http.request({port, method: 'post'}, (response) => {
@@ -168,4 +172,10 @@ describe('JsonRpc', function() {
         assert.deepEqual(rv, { jsonrpc: '2.0', id: 2, error: { data: {message: 'banana'}, code: 12345, message: 'I meant for this to happen' } })
     })
 
+    it('should bind request context to rpc handler', async function() {
+        const rv = await jsonRequest(opts, {"jsonrpc": "2.0", "method": "ctx", "params": ["baz"], "id": 2})
+        assert.deepEqual(rv, { jsonrpc: '2.0', id: 2, result: {ip: '127.0.0.1', foo: 'baz'}})
+    })
+
 })
+

@@ -1,0 +1,5 @@
+name = 'overseer'
+num_workers = 0
+[[log]]
+level = 'info'
+out = 'stdout'

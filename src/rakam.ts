@@ -7,7 +7,7 @@ import {jsonRequest} from './utils'
 
 const API_VERSION = '3'
 const PACKAGE_VERSION = require('../package').version as string
-const USER_AGENT = `steemit-leek/${ PACKAGE_VERSION }`
+const USER_AGENT = `steemit-overseer/${ PACKAGE_VERSION }`
 
 interface RakamEventContext {
     /** Rakam API key. */

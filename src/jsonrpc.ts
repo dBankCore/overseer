@@ -5,7 +5,8 @@
  */
 
 import * as assert from 'assert'
-import * as koa from 'koa'
+import * as bunyan from 'bunyan'
+import * as Koa from 'koa'
 import {VError} from 'verror'
 
 import {readJson} from './utils'
@@ -81,17 +82,30 @@ export class JsonRpcError extends VError {
 
 }
 
+export interface JsonRpcResponseOptions {
+    error?: JsonRpcError
+    request?: JsonRpcRequest
+    result?: any
+    time?: number
+}
+
 export class JsonRpcResponse {
 
     public readonly jsonrpc: string = '2.0'
+    public readonly id: JsonRpcId
+    public readonly error?: JsonRpcError
+    public readonly request?: JsonRpcRequest
+    public readonly result?: any
+    public readonly time?: number
 
-    constructor(
-        public readonly id: JsonRpcId,
-        public readonly result?: any,
-        public readonly error?: JsonRpcError,
-    ) {
+    constructor({error, request, result, time}: JsonRpcResponseOptions) {
         assert(!result || !error, 'must specify either result or error')
         assert(!(result && error), 'result and error are mutually exclusive')
+        this.id = request ? request.id : null
+        this.error = error
+        this.request = request
+        this.result = result
+        this.time = time
     }
 
     public toJSON() {
@@ -125,7 +139,8 @@ export class JsonRpcRequest {
 
 }
 
-export type JsonRpcMethod = (...params) => any
+export type JsonRpcMethodContext = {ctx: Koa.Context, log: bunyan}
+export type JsonRpcMethod = (this: JsonRpcMethodContext, ...params) => any
 
 export default class JsonRpc {
 
@@ -144,12 +159,11 @@ export default class JsonRpc {
         this.methods[name] = {method, params}
     }
 
-    public middleware = async (ctx: koa.Context, next: () => Promise<any>) => {
+    public middleware = async (ctx: Koa.Context, next: () => Promise<any>) => {
         if (ctx.method !== 'POST') {
+            const error = new JsonRpcError(JsonRpcErrorCode.InvalidRequest, 'Method Not Allowed')
             ctx.status = 405
-            ctx.body = new JsonRpcResponse(null, null,
-                new JsonRpcError(JsonRpcErrorCode.InvalidRequest, {}, 'Method Not Allowed'),
-            )
+            ctx.body = new JsonRpcResponse({error})
             return await next()
         }
 
@@ -157,46 +171,46 @@ export default class JsonRpc {
         try {
             data = await readJson(ctx.req)
         } catch (cause) {
+            const error = new JsonRpcError(JsonRpcErrorCode.ParseError, {cause}, 'Parse error')
             ctx.status = 400
-            ctx.body = new JsonRpcResponse(null, null,
-                new JsonRpcError(JsonRpcErrorCode.ParseError, {cause}, 'Parse error'),
-            )
+            ctx.body = new JsonRpcResponse({error})
             return await next()
         }
 
         // spec says an empty batch request is invalid
         if (Array.isArray(data) && data.length === 0) {
+            const error = new JsonRpcError(JsonRpcErrorCode.InvalidRequest, 'Invalid Request')
             ctx.status = 400
-            ctx.body = new JsonRpcResponse(null, null,
-                new JsonRpcError(JsonRpcErrorCode.InvalidRequest, 'Invalid Request'),
-            )
+            ctx.body = new JsonRpcResponse({error})
             return await next()
         }
 
         ctx.status = 200
         if (Array.isArray(data)) {
-            const responses = (await Promise.all(data.map(this.handleRequest))).filter(isValidResponse)
+            const rp = data.map((d) => this.handleRequest(d, ctx))
+            const responses = (await Promise.all(rp)).filter(isValidResponse)
             ctx.body = (responses.length > 0) ? responses : ''
         } else {
-            const response = await this.handleRequest(data)
+            const response = await this.handleRequest(data, ctx)
             ctx.body = isValidResponse(response) ? response : ''
         }
 
         return await next()
     }
 
-    private handleRequest = async (data: any) => {
+    private handleRequest = async (data: any, ctx: Koa.Context) => {
         let request: JsonRpcRequest
         try {
             request = JsonRpcRequest.from(data)
         } catch (cause) {
             const error = new JsonRpcError(JsonRpcErrorCode.InvalidRequest, {cause}, 'Invalid Request')
-            return new JsonRpcResponse(null, null, error)
+            return new JsonRpcResponse({error})
         }
+
         const handler = this.methods[request.method]
         if (!handler) {
             const error = new JsonRpcError(JsonRpcErrorCode.MethodNotFound, 'Method not found')
-            return new JsonRpcResponse(request.id, null, error)
+            return new JsonRpcResponse({request, error})
         }
 
         let params: any[]
@@ -208,18 +222,25 @@ export default class JsonRpc {
             }
         } catch (cause) {
             const error = new JsonRpcError(JsonRpcErrorCode.InvalidParams, {cause}, 'Invalid params')
-            return new JsonRpcResponse(request.id, null, error)
+            return new JsonRpcResponse({request, error})
         }
 
         let result: any
+        let log: bunyan | undefined
+        if (ctx['log']) {
+            log = ctx['log'].child({rpc_req: request})
+        }
+        const start = process.hrtime()
         try {
-            result = await handler.method(...params)
+            result = await handler.method.apply({log, ctx}, params)
         } catch (error) {
             if (!(error instanceof JsonRpcError)) {
                 error = new JsonRpcError(JsonRpcErrorCode.InternalError, {cause: error}, 'Internal error')
             }
-            return new JsonRpcResponse(request.id, null, error)
+            return new JsonRpcResponse({request, error})
         }
-        return new JsonRpcResponse(request.id, result || null)
+        const delta = process.hrtime(start)
+        const time = delta[0] * 1e3 + delta[1] / 1e6
+        return new JsonRpcResponse({request, result, time})
     }
 }
