@@ -17,6 +17,8 @@ ENV RAKAM_TEST_KEY ${RAKAM_TEST_KEY}
 RUN npm test
 RUN make lib
 
+RUN rm -r node_modules && npm install --production
+
 # --
 
 FROM mhart/alpine-node:base-8
