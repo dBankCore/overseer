@@ -10,6 +10,8 @@ RUN yarn
 
 COPY . /var/app
 
+RUN yarn run test && yarn run build
+
 ENV PORT 8080
 ENV NODE_ENV production
 
