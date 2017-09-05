@@ -1,34 +1,18 @@
-FROM mhart/alpine-node:8
+FROM node:8
 
-WORKDIR /app
-COPY package.json package-lock.json ./
+# yarn > npm
+RUN npm install -g yarn
 
-RUN apk add --no-cache make bash
-RUN npm install
+WORKDIR /var/app
+RUN mkdir -p /var/app
+ADD package.json /var/app/package.json
+RUN yarn
 
-COPY . .
-
-ARG RAKAM_TEST_ENDPOINT
-ENV RAKAM_TEST_ENDPOINT ${RAKAM_TEST_ENDPOINT}
-
-ARG RAKAM_TEST_KEY
-ENV RAKAM_TEST_KEY ${RAKAM_TEST_KEY}
-
-RUN npm test
-RUN make lib
-
-RUN rm -r node_modules && npm install --production
-
-# --
-
-FROM mhart/alpine-node:base-8
-
-WORKDIR /app
-COPY /app .
-
-EXPOSE 8080
+COPY . /var/app
 
 ENV PORT 8080
 ENV NODE_ENV production
 
-CMD [ "node", "lib/server.js" ]
+EXPOSE 8080
+
+CMD [ "yarn", "run", "production" ]
