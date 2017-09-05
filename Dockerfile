@@ -24,7 +24,7 @@ RUN rm -r node_modules && npm install --production
 FROM mhart/alpine-node:base-8
 
 WORKDIR /app
-COPY --from=0 /app .
+COPY /app .
 
 EXPOSE 8080
 
