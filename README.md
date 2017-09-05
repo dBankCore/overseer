@@ -9,5 +9,5 @@ Building the docker image
 -------------------------
 
 ```
-docker build --build-arg RAKAM_TEST_ENDPOINT=<rakam_api_endpoint> --build-arg RAKAM_TEST_KEY=<rakam_api_key> .
+docker build .
 ```
