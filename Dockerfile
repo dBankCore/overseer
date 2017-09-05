@@ -11,11 +11,11 @@ RUN yarn install
 
 COPY . /var/app
 
-RUN yarn run test && yarn run build
+RUN yarn run test
 
-ENV PORT 8080
+ENV PORT 8090
 ENV NODE_ENV production
 
-EXPOSE 8080
+EXPOSE 8090
 
-CMD [ "yarn", "run", "production" ]
+CMD [ "yarn", "start" ]

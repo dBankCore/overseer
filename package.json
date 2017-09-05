@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "make ci-test"
+    "test": "make ci-test",
+    "start": "ts-node src/server.ts"
   },
   "engines": {
     "node": "^8"

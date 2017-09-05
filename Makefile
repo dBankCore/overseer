@@ -32,7 +32,7 @@ lint: node_modules
 	tslint -p tsconfig.json -c tslint.json -t stylish --fix
 
 node_modules:
-	npm install
+	yarn install
 
 .PHONY: clean
 clean:
