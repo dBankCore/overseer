@@ -35,9 +35,9 @@ export async function readJson(stream: NodeJS.ReadableStream): Promise<any> {
  */
 export async function jsonRequest(options: https.RequestOptions, data: any) {
     return new Promise((resolve, reject) => {
-        let body: string
+        let body: Buffer
         try {
-            body = JSON.stringify(data)
+            body = Buffer.from(JSON.stringify(data))
         } catch (cause) {
             throw new VError({cause, name: 'RequestError'}, 'Unable to stringify request data')
         }
