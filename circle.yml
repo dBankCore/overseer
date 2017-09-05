@@ -1,3 +1,11 @@
 machine:
-  node:
-    version: 8
+    services:
+        - docker
+
+dependencies:
+    override:
+        - echo "Ignore CircleCI detected dependencies"
+
+test:
+    override:
+        - docker build -t steemit/overseer .
