@@ -1,21 +1,19 @@
-FROM node:8
+FROM node:8-alpine
 
-# yarn > npm
-RUN npm install -g yarn
+RUN apk add --no-cache make bash
 
-WORKDIR /var/app
-RUN mkdir -p /var/app
-ADD package.json /var/app/package.json
-ADD yarn.lock /var/app/yarn.lock
-RUN yarn install
+WORKDIR /app
+COPY . .
 
-COPY . /var/app
+RUN make ci-test
+RUN make lib
 
-RUN yarn run test && yarn run build
+# reinstall modules for production
+RUN rm -r node_modules && npm install --production
+
+EXPOSE 8080
 
 ENV PORT 8080
 ENV NODE_ENV production
 
-EXPOSE 8080
-
-CMD [ "yarn", "run", "production" ]
+CMD [ "node", "lib/server.js" ]
