@@ -6,13 +6,13 @@ SRC_FILES := $(shell find src -name '*.ts')
 
 all: lib
 
-lib: $(SRC_FILES) node_modules
+lib: $(SRC_FILES) node_modules tsconfig.json
 	tsc -p tsconfig.json --outDir lib
 	touch lib
 
 .PHONY: devserver
 devserver: node_modules
-	onchange -i 'src/**/*.ts' -- ts-node src/server.ts
+	@onchange -i 'src/**/*.ts' 'config/*' -- ts-node src/server.ts | bunyan -o short
 
 .PHONY: coverage
 coverage: node_modules
@@ -32,7 +32,7 @@ ci-test: node_modules
 lint: node_modules
 	tslint -p tsconfig.json -c tslint.json -t stylish --fix
 
-node_modules:
+node_modules: package.json
 	npm install
 
 .PHONY: clean
