@@ -1,21 +1,23 @@
-FROM node:8
+FROM node:8-alpine
 
-# yarn > npm
+RUN apk add --no-cache make bash git
 RUN npm install -g yarn
 
-WORKDIR /var/app
-RUN mkdir -p /var/app
-ADD package.json /var/app/package.json
-ADD yarn.lock /var/app/yarn.lock
-RUN yarn install
+# use bash as the default shell, the busybox shell does not work with ypib
+RUN cp /bin/bash /bin/sh
 
-COPY . /var/app
+WORKDIR /app
+COPY . .
 
-RUN yarn run test && yarn run build
+RUN make ci-test
+RUN make lib
+
+# prune modules
+RUN yarn install --production --non-interactive
+
+EXPOSE 8080
 
 ENV PORT 8080
 ENV NODE_ENV production
 
-EXPOSE 8080
-
-CMD [ "yarn", "run", "production" ]
+CMD [ "node", "lib/server.js" ]

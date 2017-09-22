@@ -3,7 +3,7 @@
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import {jsonRequest} from './utils'
+import {utils} from '@steemit/jsonrpc'
 
 const API_VERSION = '3'
 const PACKAGE_VERSION = require('../package').version as string
@@ -62,7 +62,7 @@ export default class Rakam {
     }
 
     private async send(path: string, data: any) {
-        return jsonRequest({
+        return utils.jsonRequest({
             path, method: 'POST',
             host: this.apiEndpoint,
             headers: {'User-Agent': USER_AGENT},
