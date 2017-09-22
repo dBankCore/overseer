@@ -16,24 +16,24 @@ devserver: node_modules
 
 .PHONY: coverage
 coverage: node_modules
-	nyc -r html -r text -e .ts -i ts-node/register mocha --reporter nyan --require ts-node/register test/*.ts
+	NODE_ENV=test nyc -r html -r text -e .ts -i ts-node/register mocha --reporter nyan --require ts-node/register test/*.ts
 
 .PHONY: test
 test: node_modules
-	mocha --require ts-node/register test/*.ts --grep '$(grep)'
+	NODE_ENV=test mocha --require ts-node/register test/*.ts --grep '$(grep)'
 
 .PHONY: ci-test
 ci-test: node_modules
 	nsp check
 	tslint -p tsconfig.json -c tslint.json
-	nyc -r lcov -e .ts -i ts-node/register mocha --reporter tap --require ts-node/register test/*.ts
+	NODE_ENV=test nyc -r lcov -e .ts -i ts-node/register mocha --reporter tap --require ts-node/register test/*.ts
 
 .PHONY: lint
 lint: node_modules
-	tslint -p tsconfig.json -c tslint.json -t stylish --fix
+	NODE_ENV=test tslint -p tsconfig.json -c tslint.json -t stylish --fix
 
-node_modules: package.json
-	npm install
+node_modules:
+	yarn install --non-interactive
 
 .PHONY: clean
 clean:

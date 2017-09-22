@@ -1,6 +1,7 @@
 FROM node:8-alpine
 
-RUN apk add --no-cache make bash
+RUN apk add --no-cache make bash git
+RUN npm install -g yarn
 
 WORKDIR /app
 COPY . .
@@ -8,8 +9,8 @@ COPY . .
 RUN make ci-test
 RUN make lib
 
-# reinstall modules for production
-RUN rm -r node_modules && npm install --production
+# prune modules
+RUN yarn install --production --non-interactive
 
 EXPOSE 8080
 
