@@ -3,8 +3,8 @@
 # port to listen on
 port = 8090
 
-# application name used for logging
-name = 'overseer-dev'
+# application name used for logging and rpc namespacing
+name = 'overseer'
 
 # number of worker processes to spawn, 0 = autodetect
 num_workers = 1
