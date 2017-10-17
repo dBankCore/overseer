@@ -6,7 +6,7 @@
     "test": "make ci-test"
   },
   "engines": {
-    "node": "^8"
+    "node": ">=8.6"
   },
   "dependencies": {
     "@steemit/jsonrpc": "git+https://github.com/steemit/koa-jsonrpc.git#5656beaf564b886f141d336864d60a3d1997ca6f",
