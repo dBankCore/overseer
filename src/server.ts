@@ -37,7 +37,7 @@ export const app = new Koa()
 const router = new Router()
 const rpc = new JsonRpc(config.get('name'))
 
-app.proxy = true
+app.proxy = !!config.get('proxy')
 app.on('error', (error) => {
     logger.error(error, 'Application error')
 })

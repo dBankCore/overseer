@@ -1,5 +1,6 @@
 name = 'overseer'
 num_workers = 0
+proxy = true
 [[log]]
 level = 'info'
 out = 'stdout'
