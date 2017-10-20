@@ -43,7 +43,7 @@ app.on('error', (error) => {
 })
 
 app.use(requestLogger(logger))
-app.use(rpcLogger(logger))
+app.use(rpcLogger(logger, 'info'))
 
 router.post('/', rpc.middleware)
 
