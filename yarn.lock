@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@steemit/jsonrpc@git+https://github.com/steemit/koa-jsonrpc.git#5656beaf564b886f141d336864d60a3d1997ca6f":
+"@steemit/jsonrpc@git+https://github.com/steemit/koa-jsonrpc.git#c837ed18f308f191f5a0ea83277325a56c733b0c":
   version "1.0.0"
-  resolved "git+https://github.com/steemit/koa-jsonrpc.git#5656beaf564b886f141d336864d60a3d1997ca6f"
+  resolved "git+https://github.com/steemit/koa-jsonrpc.git#c837ed18f308f191f5a0ea83277325a56c733b0c"
   dependencies:
     uuid "^3.1.0"
     verror "^1.10.0"
