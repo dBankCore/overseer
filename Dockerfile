@@ -1,5 +1,10 @@
 FROM node:8-alpine
 
+ARG SOURCE_COMMIT
+ENV SOURCE_COMMIT ${SOURCE_COMMIT}
+ARG DOCKER_TAG
+ENV DOCKER_TAG ${DOCKER_TAG}
+
 RUN apk add --no-cache make bash git
 RUN npm install -g yarn
 

@@ -48,7 +48,10 @@ app.use(rpcLogger(logger))
 router.post('/', rpc.middleware)
 
 router.get('/.well-known/healthcheck.json', async (ctx, next) => {
-    ctx.body = {ok: true}
+    ctx.body = {ok: true, 
+    source_commit: process.env.SOURCE_COMMIT,
+    docker_tag: process.env.DOCKER_TAG
+    }
 })
 
 app.use(router.routes())
