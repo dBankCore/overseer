@@ -37,13 +37,13 @@ export const app = new Koa()
 const router = new Router()
 const rpc = new JsonRpc(config.get('name'))
 
-app.proxy = true
+app.proxy = !!config.get('proxy')
 app.on('error', (error) => {
     logger.error(error, 'Application error')
 })
 
 app.use(requestLogger(logger))
-app.use(rpcLogger(logger))
+app.use(rpcLogger(logger, 'info'))
 
 router.post('/', rpc.middleware)
 
@@ -58,12 +58,12 @@ app.use(router.routes())
 
 rpc.register('pageview', async function(account: string, page: string, referer: string) {
     this.log.info({account, page, referer}, 'recording pageview')
-    await rakam.collect('pageview', {account, page, referer})
+    return rakam.collect('pageview', {account, page, referer})
 })
 
 rpc.register('collect', async function(collection: string, metadata: any) {
     this.log.info({collection, metadata}, 'collecting data')
-    await rakam.collect(collection, metadata)
+    return rakam.collect(collection, metadata)
 })
 
 function run() {

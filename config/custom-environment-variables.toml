@@ -1,4 +1,5 @@
 port = 'PORT'
+proxy = 'IS_PROXIED'
 num_workers = 'NUM_WORKERS'
 [rakam]
 api_endpoint = 'RAKAM_API_ENDPOINT'
