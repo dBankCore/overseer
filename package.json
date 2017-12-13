@@ -6,10 +6,10 @@
     "test": "make ci-test"
   },
   "engines": {
-    "node": "^8"
+    "node": ">=8.6"
   },
   "dependencies": {
-    "@steemit/jsonrpc": "git+https://github.com/steemit/koa-jsonrpc.git#71d90ecf2f7f58178eefc30f98e4a7d81d471414",
+    "@steemit/jsonrpc": "git+https://github.com/steemit/koa-jsonrpc.git#c837ed18f308f191f5a0ea83277325a56c733b0c",
     "bunyan": "^2.0.2",
     "config": "^1.26.2",
     "koa": "^2.3.0",
@@ -18,12 +18,12 @@
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.2",
-    "@types/config": "0.0.32",
+    "@types/config": "0.0.33",
     "@types/koa": "^2.0.39",
     "@types/koa-router": "^7.0.23",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.26",
-    "mocha": "^3.5.0",
+    "mocha": "^4.0.1",
     "nsp": "^2.8.0",
     "nyc": "^11.1.0",
     "onchange": "^3.2.1",

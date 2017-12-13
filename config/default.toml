@@ -1,10 +1,13 @@
-# steemit-overseer default configuration, override in your config/local.toml
+# steemit-overseer default configuration, override in your config/local-development.toml
 
 # port to listen on
 port = 8090
 
-# application name used for logging
-name = 'overseer-dev'
+# whether the app runs behind a trusted proxy
+proxy = false
+
+# application name used for logging and rpc namespacing
+name = 'overseer'
 
 # number of worker processes to spawn, 0 = autodetect
 num_workers = 1
