@@ -10,7 +10,7 @@ import * as Router from 'koa-router'
 import * as Koa from 'koa'
 import * as os from 'os'
 import * as UUID from 'uuid/v4'
-import {JsonRpc, requestLogger, rpcLogger} from '@steemit/jsonrpc'
+import {JsonRpc, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
 import Rakam from './rakam'
 

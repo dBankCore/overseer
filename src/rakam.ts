@@ -3,7 +3,7 @@
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import {utils} from '@steemit/jsonrpc'
+import {utils} from '@steemit/koa-jsonrpc'
 
 const API_VERSION = '3'
 const PACKAGE_VERSION = require('../package').version as string
