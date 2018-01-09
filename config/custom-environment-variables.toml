@@ -1,9 +1,6 @@
 port = 'PORT'
 proxy = 'IS_PROXIED'
 num_workers = 'NUM_WORKERS'
-[rakam]
-api_endpoint = 'RAKAM_API_ENDPOINT'
-api_key = 'RAKAM_API_KEY'
 [log]
 __name = 'LOG_STREAMS'
 __format = 'json'

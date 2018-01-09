@@ -16,8 +16,3 @@ num_workers = 1
 [[log]]
 level = 'debug'
 out = 'stdout' # path or stdout/err
-
-# rakam client settings
-# [rakam]
-# api_endpoint = 'my.rakam.server'
-# api_key = 'rakam-api-write-key'

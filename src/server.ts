@@ -12,13 +12,6 @@ import * as os from 'os'
 import * as UUID from 'uuid/v4'
 import {JsonRpc, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
-import Rakam from './rakam'
-
-const rakam = new Rakam(
-    config.get('rakam.api_endpoint'),
-    config.get('rakam.api_key')
-)
-
 const logger = bunyan.createLogger({
     name: config.get('name'),
     streams: (config.get('log') as any[]).map(({level, out}) => {
@@ -52,16 +45,6 @@ router.get('/.well-known/healthcheck.json', async (ctx, next) => {
 })
 
 app.use(router.routes())
-
-rpc.register('pageview', async function(account: string, page: string, referer: string) {
-    this.log.info({account, page, referer}, 'recording pageview')
-    return rakam.collect('pageview', {account, page, referer})
-})
-
-rpc.register('collect', async function(collection: string, metadata: any) {
-    this.log.info({collection, metadata}, 'collecting data')
-    return rakam.collect(collection, metadata)
-})
 
 function run() {
     const port = config.get('port')

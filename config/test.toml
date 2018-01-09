@@ -1,6 +1,3 @@
 [[log]]
 level = 'fatal'
 out = 'stdout'
-[rakam]
-api_endpoint = 'RAKAMAPIRAKAMAPIRAKAMAPI'
-api_key = 'RAKAMKEYRAKAMKEYRAKAMKEY'
