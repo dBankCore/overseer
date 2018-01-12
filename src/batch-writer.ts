@@ -1,95 +1,125 @@
 /**
- * @file InfluxDB batch writer.
+ * @file Pluggable batch writer with clustering support.
  * @author Johan Nordberg <johan@steemit.com>
  */
 
+import * as assert from 'assert'
 import * as cluster from 'cluster'
 import {EventEmitter} from 'events'
 import {InfluxDB, IPoint} from 'influx'
 import {VError} from 'verror'
 
+export interface BatchWriterTransport<T> {
+    /** Name of the transport. */
+    name: string
+    /** How often to flush data to transport, in milliseconds. */
+    interval: number
+    /** Max items per write, writer will flush immediatley when buffer exceeds this. */
+    maxItems: number
+    /** Write data to underlying transport. */
+    write(data: T[]): Promise<void>
+}
+
 /**
- * Writes InfluxDB points in batches.
+ * Writes data in batches.
  */
-export class BatchWriter extends EventEmitter {
+export class BatchWriter<T> extends EventEmitter {
 
-    private buffer: IPoint[] = []
-    private timer: NodeJS.Timer
-    private id: number
-
-    /**
-     * Optional preprocessor, called with all points in buffer before it is flushed.
-     */
-    public preprocess?: (points: IPoint[]) => IPoint[]
+    private transports: {[name: string]: {
+        buffer: T[]
+        timer: NodeJS.Timer
+        transport: BatchWriterTransport<T>
+    }}
+    private transportNames: string[]
 
     /**
-     * @param db  InfluxDB instance.
-     * @param flushInterval  How often to write data to databse, in milliseconds.
-     * @param maxSize  How many points to keep in memory before forcing a write.
-     * @param name  Name of shared buffer, used for inter-process communication.
-     *              Only has to be changed if you plan on using multiple
-     *              BatchWriter instances in the same process.
+     * @param name  Instance id, used for inter-process communication.
+     *              Change this to something unique to use multiple writer
+     *              instances in a clustered setup.
      */
-    constructor(
-        public readonly db: InfluxDB,
-        public readonly flushInterval = 1000,
-        public readonly maxSize = 2000,
-        public readonly name = 'writer1',
-    ) {
+    constructor(public readonly id = 'writer1') {
         super()
         if (cluster.isMaster) {
+            this.transports = {}
+            this.transportNames = []
             cluster.on('message', this.msgHandler)
-            this.timer = setInterval(this.flush, flushInterval)
         }
     }
 
     /**
-     * Write point to database... later.
-     * @param point  The point to write, point.timestamp will be set to now if missing.
+     * Add transport to writer.
      */
-    write(point: IPoint) {
+    addTransport(transport: BatchWriterTransport<T>) {
+        if (cluster.isMaster) {
+            const name = transport.name
+            const flush = () => { this.flush(name) }
+            assert(this.transports[name] === undefined, 'transport names must be unique')
+            this.transports[transport.name] = {
+                buffer: [],
+                timer: setInterval(flush, transport.interval),
+                transport,
+            }
+            this.transportNames.push(name)
+        }
+    }
+
+    /**
+     * Write data... later.
+     */
+    write(data: T) {
         if (!cluster.isMaster) {
             if (process.send) {
-                process.send({point, __name: this.name})
+                process.send({data, __id: this.id})
             } else {
                 throw new Error(`This can't happen™`)
             }
         } else {
-            if (!point.timestamp) {
-                point.timestamp = new Date()
-            }
-            this.buffer.push(point)
-            if (this.buffer.length >= this.maxSize) {
-                this.flush()
+            for (const name of this.transportNames) {
+                const {buffer, transport} = this.transports[name]
+                buffer.push(data)
+                if (buffer.length >= transport.maxItems) {
+                    this.flush(name)
+                }
             }
         }
     }
 
     /**
      * Destroy instance.
+     * @param flush  Whether to flush all buffers before destroying.
      */
-    destroy() {
-        clearInterval(this.timer)
-        cluster.removeListener('message', this.msgHandler)
-    }
-
-    private msgHandler = (worker, msg) => {
-        if (msg.point && msg.__name === this.name) {
-            this.write(msg.point)
+    async destroy(flush = true) {
+        if (cluster.isMaster) {
+            cluster.removeListener('message', this.msgHandler)
+            const writes = this.transportNames.map((name) => {
+                const {buffer, transport, timer} = this.transports[name]
+                clearInterval(timer)
+                if (flush && buffer.length > 0) {
+                    return transport.write(buffer)
+                } else {
+                    return Promise.resolve()
+                }
+            })
+            await Promise.all(writes)
         }
     }
 
-    private flush = () => {
-        const points = this.buffer
-        this.buffer = []
-        if (points.length > 0) {
+    private msgHandler = (worker, msg) => {
+        if (msg.data && msg.__id === this.id) {
+            this.write(msg.data)
+        }
+    }
+
+    private flush = (name: string) => {
+        const {buffer, transport} = this.transports[name]
+        if (buffer.length > 0) {
+            this.transports[name].buffer = []
             process.nextTick(() => {
-                let p = this.preprocess ? this.preprocess(points) : points
-                this.db.writePoints(p, {precision: 's'}).then(() => {
-                    this.emit('flush', p.length)
-                }).catch((cause) => {
-                    const error = new VError({cause}, 'Unable to write, lost %d point(s)', p.length)
-                    this.emit('error', error)
+                transport.write(buffer).then(() => {
+                    this.emit('flush', name, buffer.length)
+                }, (cause) => {
+                    const error = new VError({cause}, 'Unable to write to %s', name)
+                    setImmediate(() => { this.emit('error', error) })
                 })
             })
         }

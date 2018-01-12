@@ -14,35 +14,39 @@ import {logger as baseLogger} from './logger'
 export const db = new InfluxDB(config.get('influxdb_url'))
 
 const logger = baseLogger.child({module: 'batch-writer'})
-const writer = new BatchWriter(db, 10000)
+const writer = new BatchWriter<IPoint>()
+
+writer.addTransport({
+    name: 'influxdb',
+    interval: 1000,
+    maxItems: 2000,
+    write: async (data) => {
+        // consolidate pageviews
+        const points: IPoint[] = []
+        const pageviews: {[page: string]: IPoint} = {}
+        for (const point of data) {
+            if (point.measurement === 'pageview' && point.tags && point.fields) {
+                if (pageviews[point.tags.page]) {
+                    (pageviews[point.tags.page] as any).fields.views += point.fields.views
+                    continue
+                } else {
+                    pageviews[point.tags.page] = point
+                }
+            }
+            points.push(point)
+        }
+        // write points to db
+        await db.writePoints(points, {precision: 's'})
+    }
+})
 
 writer.on('error', (error) => {
     logger.error(error, 'writer error')
 })
 
-writer.on('flush', (points) => {
-    logger.info({points}, 'writer flushed')
+writer.on('flush', (transport, points) => {
+    logger.info({transport, points}, 'writer flushed')
 })
-
-/**
- * Batch preprocessor to consolidate pageviews.
- */
-writer.preprocess = (points) => {
-    const rv: IPoint[] = []
-    const pageviews: {[page: string]: IPoint} = {}
-    for (const point of points) {
-        if (point.measurement === 'pageview' && point.tags && point.fields) {
-            if (pageviews[point.tags.page]) {
-                (pageviews[point.tags.page] as any).fields.views += point.fields.views
-                continue
-            } else {
-                pageviews[point.tags.page] = point
-            }
-        }
-        rv.push(point)
-    }
-    return rv
-}
 
 /**
  * Collect data.
@@ -65,6 +69,7 @@ export async function collect(this: JCtx, event: string, user: string|null, data
             this.assert(typeof page === 'string', 'invalid page')
             this.assert(typeof referer === 'string', 'invalid referer')
             writer.write({
+                timestamp: new Date(),
                 measurement: 'pageview',
                 fields: {
                     views: 1
@@ -82,6 +87,7 @@ export async function collect(this: JCtx, event: string, user: string|null, data
             this.assert(typeof step === 'string', 'invalid step')
             this.assert(typeof user === 'string', 'invalid user')
             writer.write({
+                timestamp: new Date(),
                 measurement: 'signup',
                 fields: {
                     hit: 1
