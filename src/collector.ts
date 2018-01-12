@@ -14,7 +14,7 @@ import {logger as baseLogger} from './logger'
 export const db = new InfluxDB(config.get('influxdb_url'))
 
 const logger = baseLogger.child({module: 'batch-writer'})
-const writer = new BatchWriter<IPoint>()
+export const writer = new BatchWriter<IPoint>()
 
 writer.addTransport({
     name: 'influxdb',

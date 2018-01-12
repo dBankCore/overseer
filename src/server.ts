@@ -7,14 +7,16 @@ import * as bunyan from 'bunyan'
 import * as cluster from 'cluster'
 import * as config from 'config'
 import * as Router from 'koa-router'
+import * as http from 'http'
 import * as Koa from 'koa'
 import * as os from 'os'
-import * as UUID from 'uuid/v4'
+import * as util from 'util'
+
 import {JsonRpcAuth, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
 import {parseBool, ensureDatabase} from './utils'
 import {logger} from './logger'
-import {collect, db} from './collector'
+import {collect, db, writer} from './collector'
 
 export const app = new Koa()
 
@@ -46,34 +48,48 @@ rpc.register('pageview', async function(account: string, page: string, referer: 
 rpc.register('collect', collect)
 rpc.registerAuthenticated('collect_signed', collect)
 
-function run() {
-    const port = config.get('port')
-    app.listen(port, () => {
-        logger.info('running on port %d', port)
-    })
-}
-
-if (module === require.main) {
+async function main() {
     if (cluster.isMaster) {
-        ensureDatabase(db).catch((error) => {
-            logger.fatal(error, 'unable to create database')
-            setTimeout(() => process.exit(1), 1000)
-        })
+        logger.info('starting')
+        await ensureDatabase(db)
     }
+
+    let server = http.createServer(app.callback())
+    const listen = util.promisify(server.listen.bind(server))
+    const close = util.promisify(server.close.bind(server))
+
     let numWorkers = Number.parseInt(config.get('num_workers'))
     if (numWorkers === 0) {
         numWorkers = os.cpus().length
     }
-    if (numWorkers > 1) {
-        if (cluster.isMaster) {
-            logger.info('spawning %d workers', numWorkers)
-            for (let i = 0; i < numWorkers; i++) {
-                cluster.fork()
-            }
-        } else {
-            run()
+    if (cluster.isMaster && numWorkers > 1) {
+        logger.info('spawning %d workers', numWorkers)
+        for (let i = 0; i < numWorkers; i++) {
+            cluster.fork()
         }
     } else {
-        run()
+        const port = config.get('port')
+        await listen(port)
+        logger.info('running on port %d', port)
     }
+
+    const exit = async () => {
+        await Promise.all([writer.destroy(), close])
+        process.exit()
+    }
+
+    process.on('SIGTERM', () => {
+        logger.info('got SIGTERM, exiting...')
+        exit().catch((error) => {
+            logger.fatal(error, 'unable to exit gracefully')
+            setTimeout(() => process.exit(1), 1000)
+        })
+    })
+}
+
+if (module === require.main) {
+    main().catch((error) => {
+        logger.fatal(error, 'unable to start')
+        setTimeout(() => process.exit(1), 1000)
+    })
 }
