@@ -9,8 +9,14 @@ proxy = false
 # application name used for logging and rpc namespacing
 name = 'overseer'
 
+# steem rpc node used to verify signed requests
+rpc_node = 'https://api.steemit.com'
+
 # number of worker processes to spawn, 0 = autodetect
 num_workers = 1
+
+# influxdb database url
+influxdb_url = 'http://localhost:8086/overseer'
 
 # logging output, can be repeated
 [[log]]

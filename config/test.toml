@@ -1,3 +1,4 @@
+influxdb_url = 'http://test'
 [[log]]
 level = 'fatal'
 out = 'stdout'

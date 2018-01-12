@@ -10,27 +10,18 @@ import * as Router from 'koa-router'
 import * as Koa from 'koa'
 import * as os from 'os'
 import * as UUID from 'uuid/v4'
-import {JsonRpc, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
+import {JsonRpcAuth, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
-const logger = bunyan.createLogger({
-    name: config.get('name'),
-    streams: (config.get('log') as any[]).map(({level, out}) => {
-        if (out === 'stdout') {
-            return {level, stream: process.stdout}
-        } else if (out === 'stderr') {
-            return {level, stream: process.stderr}
-        } else {
-            return {level, path: out}
-        }
-    })
-})
+import {parseBool, ensureDatabase} from './utils'
+import {logger} from './logger'
+import {collect, db} from './collector'
 
 export const app = new Koa()
 
 const router = new Router()
-const rpc = new JsonRpc(config.get('name'))
+const rpc = new JsonRpcAuth(config.get('rpc_node'), config.get('name'))
 
-app.proxy = !!config.get('proxy')
+app.proxy = parseBool(config.get('proxy'))
 app.on('error', (error) => {
     logger.error(error, 'Application error')
 })
@@ -46,6 +37,15 @@ router.get('/.well-known/healthcheck.json', async (ctx, next) => {
 
 app.use(router.routes())
 
+// legacy endpoint, remove when condenser uses collect
+rpc.register('pageview', async function(account: string, page: string, referer: string) {
+    this.log.info({account, page, referer}, 'recording pageview')
+    await collect.call(this, 'pageview', account, {page, referer})
+})
+
+rpc.register('collect', collect)
+rpc.registerAuthenticated('collect_signed', collect)
+
 function run() {
     const port = config.get('port')
     app.listen(port, () => {
@@ -54,7 +54,13 @@ function run() {
 }
 
 if (module === require.main) {
-    let numWorkers = config.get('num_workers')
+    if (cluster.isMaster) {
+        ensureDatabase(db).catch((error) => {
+            logger.fatal(error, 'unable to create database')
+            setTimeout(() => process.exit(1), 1000)
+        })
+    }
+    let numWorkers = Number.parseInt(config.get('num_workers'))
     if (numWorkers === 0) {
         numWorkers = os.cpus().length
     }

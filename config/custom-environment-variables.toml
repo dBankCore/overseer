@@ -1,6 +1,8 @@
 port = 'PORT'
 proxy = 'IS_PROXIED'
 num_workers = 'NUM_WORKERS'
+influxdb_url = 'INFLUXDB_URL'
+rpc_node = 'RPC_NODE'
 [log]
 __name = 'LOG_STREAMS'
 __format = 'json'
