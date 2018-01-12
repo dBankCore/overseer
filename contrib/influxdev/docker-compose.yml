@@ -1,0 +1,33 @@
+version:  '3'
+services:
+  influxdb:
+    image: influxdb:alpine
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb:/var/lib/influxdb
+    environment:
+      INFLUXDB_REPORTING_DISABLED: 'true'
+  chronograf:
+    image: chronograf:alpine
+    ports:
+      - 8888:8888
+    volumes:
+      - chronograf:/var/lib/chronograf
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+      KAPACITOR_URL: http://kapacitor:9092
+      REPORTING_DISABLED: 'true'
+  kapacitor:
+    image: kapacitor:alpine
+    ports:
+      - 9092:9092
+    volumes:
+      - kapacitor:/var/lib/kapacitor
+    environment:
+      KAPACITOR_REPORTING_ENABLED: 'false'
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+volumes:
+  influxdb:
+  chronograf:
+  kapacitor:
