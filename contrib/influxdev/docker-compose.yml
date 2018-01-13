@@ -8,6 +8,7 @@ services:
       - influxdb:/var/lib/influxdb
     environment:
       INFLUXDB_REPORTING_DISABLED: 'true'
+      INFLUXDB_DATA_MAX_VALUES_PER_TAG: 5000000
   chronograf:
     image: chronograf:alpine
     ports:
