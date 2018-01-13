@@ -36,7 +36,7 @@ writer.addTransport({
             points.push(point)
         }
         // write points to db
-        await db.writePoints(points, {precision: 's'})
+        await db.writePoints(points, {precision: 'ms'})
     }
 })
 
@@ -63,13 +63,14 @@ export async function collect(this: JCtx, event: string, user: string|null, data
         }
     }
     this.assert(typeof event === 'string', 'invalid event name')
+    const timestamp = Date.now() + ''
     switch (event) {
         case 'pageview': {
             const {page, referer} = data
             this.assert(typeof page === 'string', 'invalid page')
             this.assert(typeof referer === 'string', 'invalid referer')
             writer.write({
-                timestamp: new Date(),
+                timestamp,
                 measurement: 'pageview',
                 fields: {
                     views: 1
@@ -87,7 +88,7 @@ export async function collect(this: JCtx, event: string, user: string|null, data
             this.assert(typeof step === 'string', 'invalid step')
             this.assert(typeof user === 'string', 'invalid user')
             writer.write({
-                timestamp: new Date(),
+                timestamp,
                 measurement: 'signup',
                 fields: {
                     hit: 1
