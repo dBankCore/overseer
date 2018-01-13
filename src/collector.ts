@@ -66,19 +66,22 @@ export async function collect(this: JCtx, event: string, user: string|null, data
     const timestamp = Date.now() + ''
     switch (event) {
         case 'pageview': {
-            const {page, referer} = data
+            let {page, referer} = data
+            let fields: any = {views: 1}
             this.assert(typeof page === 'string', 'invalid page')
-            this.assert(typeof referer === 'string', 'invalid referer')
+            if (typeof referer === 'string') {
+                referer = normalizeUrl(referer)
+                if (referer.length > 1) {
+                    fields.referer = referer
+                }
+            }
             writer.write({
                 timestamp,
                 measurement: 'pageview',
-                fields: {
-                    views: 1
-                },
+                fields,
                 tags: {
                     signed: signed as any,
                     page: normalizeUrl(page),
-                    referer: normalizeUrl(referer),
                 }
             })
             break
