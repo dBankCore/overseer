@@ -5,11 +5,11 @@
 
 import * as config from 'config'
 import {InfluxDB, IPoint} from 'influx'
-import * as normalizeUrl from 'normalize-url'
 import {JsonRpcAuthMethodContext as JCtx} from '@steemit/koa-jsonrpc'
 
 import {BatchWriter} from './batch-writer'
 import {logger as baseLogger} from './logger'
+import {normalizeUrl} from './utils'
 
 export const db = new InfluxDB(config.get('influxdb_url'))
 
@@ -70,10 +70,7 @@ export async function collect(this: JCtx, event: string, user: string|null, data
             let fields: any = {views: 1}
             this.assert(typeof page === 'string', 'invalid page')
             if (typeof referer === 'string') {
-                referer = normalizeUrl(referer)
-                if (referer.length > 1) {
-                    fields.referer = referer
-                }
+                fields.referer = normalizeUrl(referer)
             }
             writer.write({
                 timestamp,

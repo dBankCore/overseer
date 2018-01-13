@@ -1,3 +1,4 @@
+import {parse as parseUrl} from 'url'
 
 /** Deep copy JSON serializable value */
 export function copy<T>(value: T): T {
@@ -41,4 +42,16 @@ export async function ensureDatabase(instance: any) {
     if (!names.includes(options.database)) {
         await instance.createDatabase(options.database)
     }
+}
+
+/**
+ * Normalize an url.
+ * @returns normalized path component of url.
+ */
+export function normalizeUrl(url: string) {
+    const {path} = parseUrl(url)
+    if (!path || path.length === 0) {
+        return '/'
+    }
+    return path
 }
