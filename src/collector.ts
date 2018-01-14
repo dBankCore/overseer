@@ -3,13 +3,13 @@
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import {IPoint} from 'influx'
 import {JsonRpcAuthMethodContext as JCtx} from '@steemit/koa-jsonrpc'
+import {IPoint} from 'influx'
 
 import {BatchWriter} from './batch-writer'
+import {db} from './database'
 import {logger as baseLogger} from './logger'
 import {normalizeUrl} from './utils'
-import {db} from './database'
 
 const logger = baseLogger.child({module: 'batch-writer'})
 export const writer = new BatchWriter<IPoint>()
@@ -26,7 +26,7 @@ writer.addTransport({
             if (point.measurement === 'pageview' && point.fields && point.tags) {
                 const key = `${ point.fields.page }-${ point.tags.type }`
                 if (pageviews[key]) {
-                    (<any>pageviews[key]).fields.views += point.fields.views
+                    (pageviews[key] as any).fields.views += point.fields.views
                     continue
                 } else {
                     pageviews[key] = point
@@ -36,7 +36,7 @@ writer.addTransport({
         }
         // write points to db
         await db.writePoints(points, {precision: 'ms'})
-    }
+    },
 })
 
 writer.on('error', (error) => {
@@ -54,13 +54,13 @@ writer.on('flush', (transport, points) => {
  */
 export async function collect(this: JCtx, event: string, data: any) {
     this.assert(typeof event === 'string', 'invalid event name')
-    let type = this.account ? 'signed' : 'public'
+    const type = this.account ? 'signed' : 'public'
     const timestamp = Date.now().toString()
     switch (event) {
         case 'pageview': {
-            let {page} = data
+            const {page} = data
             this.assert(typeof page === 'string', 'invalid page')
-            let fields: any = {
+            const fields: any = {
                 views: 1,
                 page: normalizeUrl(page),
             }
@@ -68,7 +68,7 @@ export async function collect(this: JCtx, event: string, data: any) {
                 timestamp,
                 measurement: 'pageview',
                 fields,
-                tags: {type}
+                tags: {type},
             })
             break
         }
@@ -80,7 +80,7 @@ export async function collect(this: JCtx, event: string, data: any) {
                 timestamp,
                 measurement: 'signup',
                 fields: {step},
-                tags: {type, uid}
+                tags: {type, uid},
             })
             break
         }

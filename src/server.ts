@@ -6,18 +6,19 @@
 import * as bunyan from 'bunyan'
 import * as cluster from 'cluster'
 import * as config from 'config'
-import * as Router from 'koa-router'
 import * as http from 'http'
 import * as Koa from 'koa'
+import * as Router from 'koa-router'
 import * as os from 'os'
 import * as util from 'util'
 
 import {JsonRpcAuth, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
-import {parseBool} from './utils'
+import {collect, writer} from './collector'
 import {db, ensureDatabase} from './database'
 import {logger} from './logger'
-import {collect, writer} from './collector'
+import {getPageviews} from './stats'
+import {parseBool} from './utils'
 
 export const app = new Koa()
 
@@ -55,7 +56,7 @@ async function main() {
         await ensureDatabase(db)
     }
 
-    let server = http.createServer(app.callback())
+    const server = http.createServer(app.callback())
     const listen = util.promisify(server.listen.bind(server))
     const close = util.promisify(server.close.bind(server))
 

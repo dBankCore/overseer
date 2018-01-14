@@ -11,5 +11,5 @@ export const logger = bunyan.createLogger({
         } else {
             return {level, path: out}
         }
-    })
+    }),
 })

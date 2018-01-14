@@ -28,7 +28,7 @@ export class BatchWriter<T> extends EventEmitter {
     private transports: {[name: string]: {
         buffer: T[]
         timer: NodeJS.Timer
-        transport: BatchWriterTransport<T>
+        transport: BatchWriterTransport<T>,
     }}
     private transportNames: string[]
 
@@ -49,7 +49,7 @@ export class BatchWriter<T> extends EventEmitter {
     /**
      * Add transport to writer.
      */
-    addTransport(transport: BatchWriterTransport<T>) {
+    public addTransport(transport: BatchWriterTransport<T>) {
         if (cluster.isMaster) {
             const name = transport.name
             const flush = () => { this.flush(name) }
@@ -66,7 +66,7 @@ export class BatchWriter<T> extends EventEmitter {
     /**
      * Write data... later.
      */
-    write(data: T) {
+    public write(data: T) {
         if (!cluster.isMaster) {
             if (process.send) {
                 process.send({data, __id: this.id})
@@ -88,7 +88,7 @@ export class BatchWriter<T> extends EventEmitter {
      * Destroy instance.
      * @param flush  Whether to flush all buffers before destroying.
      */
-    async destroy(flush = true) {
+    public async destroy(flush = true) {
         if (cluster.isMaster) {
             cluster.removeListener('message', this.msgHandler)
             const writes = this.transportNames.map((name) => {
