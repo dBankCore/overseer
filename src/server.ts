@@ -42,7 +42,7 @@ app.use(router.routes())
 // legacy endpoint, remove when condenser uses collect
 rpc.register('pageview', async function(account: string, page: string, referer: string) {
     this.log.info({account, page, referer}, 'recording pageview')
-    await collect.call(this, 'pageview', account, {page, referer})
+    await collect.call(this, 'pageview', account, {page})
 })
 
 rpc.register('collect', collect)

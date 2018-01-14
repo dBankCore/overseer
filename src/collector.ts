@@ -25,12 +25,13 @@ writer.addTransport({
         const points: IPoint[] = []
         const pageviews: {[page: string]: IPoint} = {}
         for (const point of data) {
-            if (point.measurement === 'pageview' && point.tags && point.fields) {
-                if (pageviews[point.tags.page]) {
-                    (pageviews[point.tags.page] as any).fields.views += point.fields.views
+            if (point.measurement === 'pageview' && point.fields && point.tags) {
+                const key = `${ point.fields.page }-${ point.tags.type }`
+                if (pageviews[key]) {
+                    (<any>pageviews[key]).fields.views += point.fields.views
                     continue
                 } else {
-                    pageviews[point.tags.page] = point
+                    pageviews[key] = point
                 }
             }
             points.push(point)
@@ -51,53 +52,37 @@ writer.on('flush', (transport, points) => {
 /**
  * Collect data.
  * @param event  Event name, used as influx measurement.
- * @param user  User id number that performed event.
  * @param data  Event payload.
  */
-export async function collect(this: JCtx, event: string, user: string|null, data: any) {
-    let signed = false
-    if (this.account) {
-        signed = true
-        if (user !== null) {
-            this.assert(this.account === user, 'signer does not match user')
-        }
-    }
+export async function collect(this: JCtx, event: string, data: any) {
     this.assert(typeof event === 'string', 'invalid event name')
-    const timestamp = Date.now() + ''
+    let type = this.account ? 'signed' : 'public'
+    const timestamp = Date.now().toString()
     switch (event) {
         case 'pageview': {
-            let {page, referer} = data
-            let fields: any = {views: 1}
+            let {page} = data
             this.assert(typeof page === 'string', 'invalid page')
-            if (typeof referer === 'string') {
-                fields.referer = normalizeUrl(referer)
+            let fields: any = {
+                views: 1,
+                page: normalizeUrl(page),
             }
             writer.write({
                 timestamp,
                 measurement: 'pageview',
                 fields,
-                tags: {
-                    signed: signed as any,
-                    page: normalizeUrl(page),
-                }
+                tags: {type}
             })
             break
         }
         case 'signup': {
-            const {step} = data
+            const {step, uid} = data
             this.assert(typeof step === 'string', 'invalid step')
-            this.assert(typeof user === 'string', 'invalid user')
+            this.assert(typeof uid === 'string', 'invalid uid')
             writer.write({
                 timestamp,
                 measurement: 'signup',
-                fields: {
-                    hit: 1
-                },
-                tags: {
-                    signed: signed as any,
-                    user: user as any,
-                    step,
-                }
+                fields: {step},
+                tags: {type, uid}
             })
             break
         }
