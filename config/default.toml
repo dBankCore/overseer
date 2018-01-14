@@ -18,6 +18,12 @@ num_workers = 1
 # influxdb database url
 influxdb_url = 'http://localhost:8086/overseer'
 
+# which log level to write request logs to
+request_log_level = 'debug'
+
+# which log level to write rpc logs to
+rpc_log_level = 'info'
+
 # logging output, can be repeated
 [[log]]
 level = 'debug'

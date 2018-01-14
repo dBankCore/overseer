@@ -28,8 +28,8 @@ app.on('error', (error) => {
     logger.error(error, 'Application error')
 })
 
-app.use(requestLogger(logger))
-app.use(rpcLogger(logger, 'info'))
+app.use(requestLogger(logger, config.get('request_log_level')))
+app.use(rpcLogger(logger, config.get('rpc_log_level')))
 
 router.post('/', rpc.middleware)
 

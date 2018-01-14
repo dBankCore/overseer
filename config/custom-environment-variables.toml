@@ -3,6 +3,8 @@ proxy = 'IS_PROXIED'
 num_workers = 'NUM_WORKERS'
 influxdb_url = 'INFLUXDB_URL'
 rpc_node = 'RPC_NODE'
+request_log_level = 'REQUEST_LOG_LEVEL'
+rpc_log_level = 'RPC_LOG_LEVEL'
 [log]
 __name = 'LOG_STREAMS'
 __format = 'json'
