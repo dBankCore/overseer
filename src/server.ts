@@ -50,6 +50,8 @@ rpc.register('pageview', async function(account: string, page: string, referer: 
 rpc.register('collect', collect)
 rpc.registerAuthenticated('collect_signed', collect)
 
+rpc.register('get_pageviews', getPageviews)
+
 async function main() {
     if (cluster.isMaster) {
         logger.info('starting')
