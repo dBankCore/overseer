@@ -31,20 +31,6 @@ export function parseBool(input: any): boolean {
 }
 
 /**
- * Create InfluxDB database if it does not exist.
- */
-export async function ensureDatabase(instance: any) {
-    const {options} = instance
-    if (!options.database) {
-        throw new Error('InfluxDB database name not set')
-    }
-    const names = await instance.getDatabaseNames()
-    if (!names.includes(options.database)) {
-        await instance.createDatabase(options.database)
-    }
-}
-
-/**
  * Normalize an url.
  * @returns normalized path component of url.
  */

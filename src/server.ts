@@ -14,9 +14,10 @@ import * as util from 'util'
 
 import {JsonRpcAuth, requestLogger, rpcLogger} from '@steemit/koa-jsonrpc'
 
-import {parseBool, ensureDatabase} from './utils'
+import {parseBool} from './utils'
+import {db, ensureDatabase} from './database'
 import {logger} from './logger'
-import {collect, db, writer} from './collector'
+import {collect, writer} from './collector'
 
 export const app = new Koa()
 

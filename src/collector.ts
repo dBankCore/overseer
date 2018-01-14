@@ -1,17 +1,15 @@
 /**
- * @file InfluxDB stats collector
+ * @file InfluxDB stats collector.
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import * as config from 'config'
-import {InfluxDB, IPoint} from 'influx'
+import {IPoint} from 'influx'
 import {JsonRpcAuthMethodContext as JCtx} from '@steemit/koa-jsonrpc'
 
 import {BatchWriter} from './batch-writer'
 import {logger as baseLogger} from './logger'
 import {normalizeUrl} from './utils'
-
-export const db = new InfluxDB(config.get('influxdb_url'))
+import {db} from './database'
 
 const logger = baseLogger.child({module: 'batch-writer'})
 export const writer = new BatchWriter<IPoint>()
