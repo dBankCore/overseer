@@ -1,6 +1,4 @@
+influxdb_url = 'http://test'
 [[log]]
 level = 'fatal'
 out = 'stdout'
-[rakam]
-api_endpoint = 'RAKAMAPIRAKAMAPIRAKAMAPI'
-api_key = 'RAKAMKEYRAKAMKEYRAKAMKEY'

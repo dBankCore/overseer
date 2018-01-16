@@ -1,0 +1,21 @@
+
+info
+
+    docker-compose config to run a development influxdb
+    with chronograf and kapacitor
+
+to run
+
+    docker-compose up
+
+resources
+
+    https://docs.influxdata.com/influxdb/v1.4/
+    https://docs.influxdata.com/chronograf/v1.3/
+    https://docs.influxdata.com/kapacitor/v1.4/
+
+    https://docs.docker.com/compose/
+
+    https://hub.docker.com/_/chronograf/
+    https://hub.docker.com/_/influxdb/
+    https://hub.docker.com/_/kapacitor/

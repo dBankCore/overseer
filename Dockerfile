@@ -7,9 +7,11 @@ RUN npm install -g yarn
 RUN cp /bin/bash /bin/sh
 
 WORKDIR /app
-COPY . .
+COPY package.json yarn.lock ./
 
 RUN yarn install --non-interactive --frozen-lockfile
+
+COPY . .
 
 RUN make ci-test
 RUN make lib

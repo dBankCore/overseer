@@ -9,12 +9,14 @@
     "node": ">=8.6"
   },
   "dependencies": {
-    "@steemit/jsonrpc": "git+https://github.com/steemit/koa-jsonrpc.git#c837ed18f308f191f5a0ea83277325a56c733b0c",
+    "@steemit/koa-jsonrpc": "^1.1.0",
     "bunyan": "^2.0.2",
     "config": "^1.26.2",
+    "influx": "^5.0.7",
     "koa": "^2.3.0",
     "koa-router": "^7.2.1",
-    "toml": "^2.3.3"
+    "toml": "^2.3.3",
+    "verror": "^1.10.0"
   },
   "devDependencies": {
     "@types/bunyan": "^1.8.2",
@@ -23,6 +25,7 @@
     "@types/koa-router": "^7.0.23",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.26",
+    "@types/verror": "^1.10.3",
     "mocha": "^4.0.1",
     "nsp": "^2.8.0",
     "nyc": "^11.1.0",

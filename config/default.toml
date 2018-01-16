@@ -9,15 +9,22 @@ proxy = false
 # application name used for logging and rpc namespacing
 name = 'overseer'
 
+# steem rpc node used to verify signed requests
+rpc_node = 'https://api.steemit.com'
+
 # number of worker processes to spawn, 0 = autodetect
 num_workers = 1
+
+# influxdb database url
+influxdb_url = 'http://localhost:8086/overseer'
+
+# which log level to write request logs to
+request_log_level = 'debug'
+
+# which log level to write rpc logs to
+rpc_log_level = 'info'
 
 # logging output, can be repeated
 [[log]]
 level = 'debug'
 out = 'stdout' # path or stdout/err
-
-# rakam client settings
-# [rakam]
-# api_endpoint = 'my.rakam.server'
-# api_key = 'rakam-api-write-key'
