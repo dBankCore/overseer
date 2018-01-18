@@ -54,6 +54,7 @@ writer.on('flush', (transport, points) => {
  */
 export async function collect(this: JCtx, event: string, data: any) {
     this.assert(typeof event === 'string', 'invalid event name')
+    this.assert(data === Object(data), 'invalid event data')
     const type = this.account ? 'signed' : 'public'
     const timestamp = Date.now().toString()
     switch (event) {
