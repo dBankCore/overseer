@@ -33,13 +33,13 @@ app.on('error', (error) => {
 app.use(requestLogger(logger, config.get('request_log_level')))
 app.use(rpcLogger(logger, config.get('rpc_log_level')))
 
-router.post('/', rpc.middleware)
+router.post('/', rpc.middleware as any)
 
 router.get('/.well-known/healthcheck.json', async (ctx, next) => {
     ctx.body = {ok: true}
 })
 
-app.use(router.routes())
+app.use(router.routes() as any)
 
 // legacy endpoint, remove when condenser uses collect
 rpc.register('pageview', async function(account: string, page: string, referer: string) {
