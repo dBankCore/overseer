@@ -24,7 +24,7 @@ writer.addTransport({
         const pageviews: {[page: string]: IPoint} = {}
         for (const point of data) {
             if (point.measurement === 'pageview' && point.fields && point.tags) {
-                const key = `${ point.fields.page }-${ point.tags.type }`
+                const key = `${ point.tags.page }-${ point.tags.type }`
                 if (pageviews[key]) {
                     (pageviews[key] as any).fields.views += point.fields.views
                     continue
@@ -54,6 +54,7 @@ writer.on('flush', (transport, points) => {
  */
 export async function collect(this: JCtx, event: string, data: any) {
     this.assert(typeof event === 'string', 'invalid event name')
+    this.assert(data === Object(data), 'invalid event data')
     const type = this.account ? 'signed' : 'public'
     const timestamp = Date.now().toString()
     switch (event) {
@@ -62,13 +63,15 @@ export async function collect(this: JCtx, event: string, data: any) {
             this.assert(typeof page === 'string', 'invalid page')
             const fields: any = {
                 views: 1,
-                page: normalizeUrl(page),
             }
             writer.write({
                 timestamp,
                 measurement: 'pageview',
                 fields,
-                tags: {type},
+                tags: {
+                    page: normalizeUrl(page),
+                    type,
+                },
             })
             break
         }
