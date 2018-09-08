@@ -1,4 +1,4 @@
-# steemit-overseer default configuration, override in your config/local-development.toml
+# dpay-overseer default configuration, override in your config/local-development.toml
 
 # port to listen on
 port = 8090
@@ -9,8 +9,8 @@ proxy = false
 # application name used for logging and rpc namespacing
 name = 'overseer'
 
-# steem rpc node used to verify signed requests
-rpc_node = 'https://api.steemit.com'
+# dPay rpc node used to verify signed requests
+rpc_node = 'https://api.dpays.io'
 
 # number of worker processes to spawn, 0 = autodetect
 num_workers = 1

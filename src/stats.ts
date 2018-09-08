@@ -3,7 +3,7 @@
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import {JsonRpcAuthMethodContext as JCtx} from '@steemit/koa-jsonrpc'
+import {JsonRpcAuthMethodContext as JCtx} from '@dpay/koa-jsonrpc'
 import * as config from 'config'
 import {escape, InfluxDB, IPoint} from 'influx'
 

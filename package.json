@@ -1,5 +1,5 @@
 {
-  "name": "@steemit/overseer-server",
+  "name": "@dpay/overseer-server",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
@@ -9,7 +9,7 @@
     "node": ">=8.6"
   },
   "dependencies": {
-    "@steemit/koa-jsonrpc": "^1.1.2",
+    "@dpay/koa-jsonrpc": "^0.1.1",
     "bunyan": "^2.0.2",
     "config": "^1.30.0",
     "influx": "^5.0.7",

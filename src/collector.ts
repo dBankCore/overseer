@@ -3,7 +3,7 @@
  * @author Johan Nordberg <johan@steemit.com>
  */
 
-import {JsonRpcAuthMethodContext as JCtx} from '@steemit/koa-jsonrpc'
+import {JsonRpcAuthMethodContext as JCtx} from '@dpay/koa-jsonrpc'
 import {IPoint} from 'influx'
 
 import {BatchWriter} from './batch-writer'
