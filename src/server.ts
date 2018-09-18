@@ -12,7 +12,7 @@ import * as Router from 'koa-router'
 import * as os from 'os'
 import * as util from 'util'
 
-import {JsonRpcAuth, requestLogger, rpcLogger} from '@dpay/koa-jsonrpc'
+import {JsonRpcAuth, requestLogger, rpcLogger} from 'dpay-json-rpc'
 
 import {collect, writer} from './collector'
 import {db, ensureDatabase} from './database'

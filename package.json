@@ -1,5 +1,5 @@
 {
-  "name": "@dpay/overseer-server",
+  "name": "dpay-overseer",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
@@ -9,9 +9,9 @@
     "node": ">=8.6"
   },
   "dependencies": {
-    "@dpay/koa-jsonrpc": "^0.1.1",
     "bunyan": "^2.0.2",
     "config": "^1.30.0",
+    "dpay-json-rpc": "~0.1.1",
     "influx": "^5.0.7",
     "koa": "^2.5.0",
     "koa-router": "^7.4.0",

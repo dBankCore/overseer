@@ -1,7 +1,7 @@
 import 'mocha'
 import * as assert from 'assert'
 import * as http from 'http'
-import {utils} from '@dpay/koa-jsonrpc'
+import {utils} from 'dpay-json-rpc'
 
 import {app} from './../src/server'
 

@@ -1,7 +1,7 @@
 # dpay-overseer default configuration, override in your config/local-development.toml
 
 # port to listen on
-port = 8090
+port = 1776
 
 # whether the app runs behind a trusted proxy
 proxy = false
